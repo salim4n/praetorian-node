@@ -1,4 +1,5 @@
 "use client"
+
 import '@tensorflow/tfjs-backend-cpu';
 import '@tensorflow/tfjs-backend-webgl';
 import { useRef, useEffect, useState } from 'react';
@@ -8,6 +9,7 @@ import {
   } from '@tensorflow-models/coco-ssd';
 import * as tf from '@tensorflow/tfjs';
 import Webcam from 'react-webcam';
+import { Detected, sendPicture } from './lib/actions';
 
 export default function Home() {
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>()
@@ -29,18 +31,22 @@ export default function Home() {
       undefined,
       0.5
     )
-    objectDetected.forEach((o) => {
+    objectDetected.forEach(async(o) => {
       if(o.class === "person"){
-        // send data to azure blob storage
-        alert("i see you") // remove this then 
+        const body = {
+          detected: o,
+          picture: webcamRef.current && webcamRef.current.getScreenshot({width: 640, height: 480})
+        }
+        console.table(body.picture)
+        await sendPicture(body as Detected)
       }
     })
 
   }
 }
 
-
   useEffect(() => {
+    tf.setBackend('webgl');
     navigator.mediaDevices.enumerateDevices()
       .then(devices => {
         const videoDevices = devices.filter(device => device.kind === 'videoinput');
@@ -51,7 +57,6 @@ export default function Home() {
       return () => {
         tf.disposeVariables()
     }
-
   }, []);
 
   return (
