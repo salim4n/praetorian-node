@@ -19,7 +19,7 @@ if (!connectionString) throw Error('Azure Storage connectionString not found')
 const sharedKeyCredential = new StorageSharedKeyCredential(
     accountName,
     accountKey
-  )
+)
 
 const blobServiceClient = new BlobServiceClient(
     `https://${accountName}.blob.core.windows.net`,
@@ -42,7 +42,6 @@ try{
     buffer && await blockBlobClient.upload(buffer, buffer.length)
     await blockBlobClient.setMetadata({class : body.detected.class})
     console.log(`Picture uploaded: ${blobName}`)
-    
 }catch(e){
     console.error(e)
 }
