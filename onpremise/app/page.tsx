@@ -37,7 +37,6 @@ export default function Home() {
           detected: o,
           picture: webcamRef.current && webcamRef.current.getScreenshot({width: 640, height: 480})
         }
-        console.table(body.picture)
         await sendPicture(body as Detected)
       }
     })
