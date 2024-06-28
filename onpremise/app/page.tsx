@@ -42,6 +42,7 @@ export default function Board() {
       .then(devices => {
         const videoDevices = devices.filter(device => device.kind === 'videoinput')
         setCameras(videoDevices)
+        console.log(videoDevices)
       })
       .then(() => runCocoSsd())
 

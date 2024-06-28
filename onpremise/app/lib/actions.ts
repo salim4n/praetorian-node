@@ -45,12 +45,9 @@ try{
     const blockBlobClient = containerClient.getBlockBlobClient(blobName)
     buffer && await blockBlobClient.upload(buffer, buffer.length)
     await blockBlobClient.setMetadata({class : body.detected.class})
-    console.log(`Picture uploaded: ${blobName}`)
-    //now we can send to the telegram bot too
     const imageUrl = await generateSasToken(containerName, blobName)
     const message = `Detected: ${body.detected.class}, Confidence: ${body.detected.score.toPrecision(2)} \n Picture: ${imageUrl}`
     await sendTelegramMessage(token, chatId, message)
-    console.log(`Message sent to telegram: ${message}`)
 }catch(e){
     console.error(e)
 }
@@ -76,14 +73,12 @@ const generateSasToken = async (containerName: string, blobName: string): Promis
     const blobServiceClient = new BlobServiceClient(`https://${accountName}.blob.core.windows.net`, sharedKeyCredential)
     const containerClient = blobServiceClient.getContainerClient(containerName)
     const blobClient = containerClient.getBlobClient(blobName)
-
     const expiryDate = new Date()
-    expiryDate.setHours(expiryDate.getHours() + 12)
-
+    expiryDate.setHours(expiryDate.getHours() + 128)
     const sasOptions: BlobSASSignatureValues = {
         containerName: containerName,
         blobName: blobName,
-        permissions: BlobSASPermissions.parse('r'), // Permission de lecture
+        permissions: BlobSASPermissions.parse('r'),
         expiresOn: expiryDate
     }
     const sasToken = generateBlobSASQueryParameters(sasOptions, sharedKeyCredential).toString()

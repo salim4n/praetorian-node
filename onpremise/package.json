@@ -16,6 +16,8 @@
     "dotenv": "^16.4.5",
     "lucide-react": "^0.395.0",
     "next": "14.2.3",
+    "node-fetch": "^3.3.2",
+    "node-ssdp": "^4.0.1",
     "react": "^18",
     "react-dom": "^18",
     "react-webcam": "^7.2.0",
