@@ -2,15 +2,20 @@
 
 import '@tensorflow/tfjs-backend-cpu'
 import '@tensorflow/tfjs-backend-webgl'
-import { useRef, useEffect, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react';
+import io from 'socket.io-client'
+import Peer from 'simple-peer';
 import { load as cocoSSDLoad, type ObjectDetection } from '@tensorflow-models/coco-ssd'
 import * as tf from '@tensorflow/tfjs'
 import Webcam from 'react-webcam'
 import { Detected, sendPicture } from './lib/actions'
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 
+
 export default function Board() {
   const [cameras, setCameras] = useState<MediaDeviceInfo[]>([])
+  const [peer, setPeer] = useState<Peer.Instance | null>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
   const webcamRefs = useRef<Webcam[]>([])
   const [net, setNet] = useState<ObjectDetection | null>(null)
 
@@ -35,6 +40,37 @@ export default function Board() {
       }
     })
   }
+  useEffect(() => {
+    const socket = io();
+
+    const peer = new Peer({ initiator: window.location.hash === '#init', trickle: false });
+    setPeer(peer);
+
+    peer.on('signal', (data) => {
+      socket.emit('signal', data);
+    });
+
+    socket.on('signal', (data) => {
+      peer.signal(data);
+    });
+
+    peer.on('stream', (stream) => {
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    });
+
+    navigator.mediaDevices.getUserMedia({ video: true, audio: true }).then((stream) => {
+      peer.addStream(stream);
+      if (videoRef.current) {
+        videoRef.current.srcObject = stream;
+      }
+    });
+
+    return () => {
+      socket.close();
+    };
+  }, []);
 
   useEffect(() => {
     tf.setBackend('webgl')
@@ -79,14 +115,13 @@ export default function Board() {
               }}
               ref={(el) => {
                 if (el) {
-                  webcamRefs.current[index] = el
+                  webcamRefs.current[index] = el;
                 }
-              }}
+              } }
               key={index}
               width={640}
               height={480}
-              className='m-1 rounded-md border-gray-500 border-2'
-            />
+              className='m-1 rounded-md border-gray-500 border-2' />
           </CardContent>
         </Card>
       ))}

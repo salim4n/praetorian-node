@@ -8,7 +8,7 @@ export default function Discover() {
 
   const discoverDevices = async () => {
     try {
-      const response = await fetch('/api/discover', { method: 'GET' })
+      const response = await fetch('/api/rtsp', { method: 'GET' })
       if (!response.ok) {
         throw new Error(`HTTP error! status: ${response.status}`)
       }
